@@ -1,12 +1,16 @@
 let globalValidSpots = [];
 let globalCurrentSpots = [];
 let globalCurrentSpot;
+let lastSolution;
+let solutionCount = 0;
 
 function setup() {
     createCanvas(600, 600);
     noStroke();
-    setTimeout(() => {
-        findSolution([]);
+    setTimeout(async () => {
+        await findSolution([]);
+        globalCurrentSpots = lastSolution;
+        globalCurrentSpot = lastSolution[7];
     }, 0);
 }
 
@@ -56,12 +60,16 @@ async function findSolution(currentSpots) {
     globalValidSpots = validSpots;
     globalCurrentSpots = currentSpots;
     if (currentSpots.length == 8) {
+        console.log("Solutions found: " + ++solutionCount);
         console.log(currentSpots);
-        return currentSpots
+        lastSolution = currentSpots;
+        await sleep(1000);
+        // return currentSpots
     }
+    
+    await sleep(50);
     for (let i = 0; i < validSpots.length; i++) {
         for (let j = 0; j < validSpots[0].length; j++) {
-            if (Math.random() < 0.001) await sleep(1);
             if (validSpots[j][i]) {
                 let loc = new Pos(i, j);
                 globalCurrentSpot = loc;
@@ -81,10 +89,13 @@ function getAllSpots() {
     return JSON.parse(JSON.stringify(Array(8).fill(Array(8).fill(true))));
 }
 
-let currentSpots = [];
-
 function getValidSpots(currentSpots) {
     let output = getAllSpots().slice();
+    for (let i = 0; i < 8; i++) {
+        if (i != currentSpots.length) {
+            output[i] = JSON.parse(JSON.stringify(Array(8).fill(false)));
+        }
+    }
     for (let currentSpot of currentSpots) {
         let x = currentSpot.x;
         let y = currentSpot.y;
